@@ -12,7 +12,7 @@ dynamodb = boto3.resource(
     "dynamodb",
     aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
     aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
-    region_name=os.environ["AWS_DEFAULT_REGION"]
+    region_name=os.environ["AWS_REGION"]
 )
 
 table_name = os.environ["DYNAMODB_TABLE_NAME"]
