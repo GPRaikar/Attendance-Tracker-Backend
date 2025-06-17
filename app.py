@@ -12,7 +12,7 @@ from threading import Thread
 from collections import defaultdict  # <-- make sure this import is present
 from dateutil import parser         # <-- also ensure this is imported
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
 CORS(app)  # Allow cross-origin requests from frontend
 
