@@ -68,8 +68,8 @@ def handle_interaction():
                 "wfo_satellite": "Work from Office (Satellite)"
             }
             final_status = status_map[action_id]
-            print(f"[{user_id}] selected: {final_status}")
-            sys.stdout.flush()
+            # print(f"[{user_id}] selected: {final_status}")
+            # sys.stdout.flush()
 
             # Save to DynamoDB
             item = {
@@ -80,6 +80,9 @@ def handle_interaction():
             }
             table.put_item(Item=item)
 
+            print(f"[{user_id}] selected: {final_status}")
+            sys.stdout.flush()
+            
             return jsonify({
                 "replace_original": True,
                 "text": f"✅ Your attendance has been recorded as *{final_status}*."
