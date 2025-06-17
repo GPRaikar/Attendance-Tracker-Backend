@@ -1,19 +1,24 @@
 // static/calendar.js
+
 let attendanceData = {};
 let allUsers = new Set();
 let currentMonth = new Date();
 
 async function loadAttendance() {
-  const res = await fetch("/api/attendance");
-  attendanceData = await res.json();
-  allUsers.clear();
+  try {
+    const res = await fetch("/api/attendance");
+    attendanceData = await res.json();
+    allUsers.clear();
 
-  Object.values(attendanceData).forEach(entries => {
-    entries.forEach(e => allUsers.add(e.username || "unknown"));
-  });
+    Object.values(attendanceData).forEach(entries => {
+      entries.forEach(e => allUsers.add(e.username || "unknown"));
+    });
 
-  populateUserDropdown();
-  renderCalendar();
+    populateUserDropdown();
+    renderCalendar();
+  } catch (error) {
+    console.error("Failed to load attendance:", error);
+  }
 }
 
 function populateUserDropdown() {
@@ -32,9 +37,10 @@ function populateUserDropdown() {
 function renderCalendar() {
   const filterUser = document.getElementById("userFilter").value;
   const calendar = document.getElementById("calendar");
+  const monthLabel = document.getElementById("monthLabel");
+
   calendar.innerHTML = "";
 
-  const monthLabel = document.getElementById("monthLabel");
   const options = { month: "long", year: "numeric" };
   monthLabel.textContent = currentMonth.toLocaleDateString(undefined, options);
 

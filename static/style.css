@@ -1,0 +1,96 @@
+/* static/style.css */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f6f8fa;
+  margin: 0;
+  padding: 2rem;
+  color: #333;
+}
+
+.calendar-container {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+h1, h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+label, select, .calendar-controls {
+  display: block;
+  margin: 1rem auto;
+  text-align: center;
+}
+
+select {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+button {
+  margin: 0 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background-color: #1976d2;
+  color: white;
+}
+
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.day {
+  background-color: #eef2f7;
+  border-radius: 8px;
+  padding: 1rem;
+  border-left: 6px solid transparent;
+}
+
+.today {
+  border-left-color: #ffa500;
+  background-color: #fff3cd;
+}
+
+.date {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.status {
+  padding: 0.3rem 0.5rem;
+  margin: 0.25rem 0;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.status.wfo {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.status.wfh {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+
+.status.leave {
+  background-color: #ffebee;
+  color: #b71c1c;
+}
+
+.status.unknown {
+  background-color: #eceff1;
+  color: #37474f;
+}

@@ -10,14 +10,18 @@
 <body>
   <div class="calendar-container">
     <h1>📅 Attendance Calendar</h1>
+    <h2 id="monthLabel"></h2>
+
     <label for="userFilter">Filter by user:</label>
     <select id="userFilter">
-      <option value="all">All Users</option>
+      <option value="">All Users</option>
     </select>
+
     <div class="calendar-controls">
       <button id="prevMonth">⬅️ Prev</button>
       <button id="nextMonth">➡️ Next</button>
     </div>
+
     <div id="calendar"></div>
   </div>
 
