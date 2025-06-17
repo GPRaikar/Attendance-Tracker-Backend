@@ -82,7 +82,15 @@ def handle_interaction():
 
             return jsonify({
                 "replace_original": True,
-                "text": f"✅ Your attendance has been recorded as *{final_status}*."
+                "blocks": [
+                {
+                    "type": "section",
+                    "text": 
+                    {
+                    "type": "mrkdwn",
+                    "text": f"✅ Your attendance has been recorded as *{final_status}*."
+                    }
+                }]
             })
 
         return jsonify({"text": "Unknown action."}), 200
