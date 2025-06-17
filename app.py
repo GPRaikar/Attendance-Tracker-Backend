@@ -5,6 +5,7 @@ import os
 import sys
 import boto3
 from datetime import datetime
+from threading import Thread
 
 app = Flask(__name__)
 
@@ -18,6 +19,21 @@ dynamodb = boto3.resource(
 
 table_name = os.environ["DYNAMODB_TABLE_NAME"]
 table = dynamodb.Table(table_name)
+
+def write_to_dynamodb(user_id, username, status):
+    try:
+        item = {
+            "user_id": user_id,
+            "username": username,
+            "status": status,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        table.put_item(Item=item)
+        print(f"[{user_id}] saved: {status}")
+        sys.stdout.flush()
+    except Exception as e:
+        print(f"[{user_id}] failed to save to DynamoDB:", e)
+        sys.stdout.flush()
 
 @app.route("/slack/interact", methods=["POST"])
 def handle_interaction():
@@ -41,18 +57,13 @@ def handle_interaction():
 
         final_status = status_map[action_id]
 
-        # Save to DynamoDB
-        item = {
-            "user_id": user_id,
-            "username": username,
-            "status": final_status,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        table.put_item(Item=item)
+        # Start background thread to write to DynamoDB
+        Thread(target=write_to_dynamodb, args=(user_id, username, final_status)).start()
 
         print(f"[{user_id}] selected: {final_status}")
         sys.stdout.flush()
 
+        # Send confirmation immediately
         return jsonify({
             "replace_original": True,
             "blocks": [
@@ -70,6 +81,82 @@ def handle_interaction():
         print("Error handling interaction:", str(e))
         sys.stdout.flush()
         return jsonify({"text": f"⚠️ Internal error: {str(e)}"}), 200
+
+
+
+
+# # app.py
+# from flask import Flask, request, jsonify
+# import json
+# import os
+# import sys
+# import boto3
+# from datetime import datetime
+
+# app = Flask(__name__)
+
+# # Set up DynamoDB client using environment variables
+# dynamodb = boto3.resource(
+#     "dynamodb",
+#     aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+#     aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+#     region_name=os.environ["AWS_REGION"]
+# )
+
+# table_name = os.environ["DYNAMODB_TABLE_NAME"]
+# table = dynamodb.Table(table_name)
+
+# @app.route("/slack/interact", methods=["POST"])
+# def handle_interaction():
+#     try:
+#         payload = json.loads(request.form["payload"])
+#         print("Payload received:", json.dumps(payload, indent=2))
+#         sys.stdout.flush()
+
+#         user_id = payload["user"]["id"]
+#         username = payload["user"].get("username", "unknown")
+#         action_id = payload["actions"][0]["action_id"]
+
+#         status_map = {
+#             "wfh": "Work from Home",
+#             "leave": "On Leave",
+#             "wfo": "Work from Office"
+#         }
+
+#         if action_id not in status_map:
+#             return jsonify({"text": "❌ Unknown action."}), 200
+
+#         final_status = status_map[action_id]
+
+#         # Save to DynamoDB
+#         item = {
+#             "user_id": user_id,
+#             "username": username,
+#             "status": final_status,
+#             "timestamp": datetime.utcnow().isoformat()
+#         }
+#         table.put_item(Item=item)
+
+#         print(f"[{user_id}] selected: {final_status}")
+#         sys.stdout.flush()
+
+#         return jsonify({
+#             "replace_original": True,
+#             "blocks": [
+#                 {
+#                     "type": "section",
+#                     "text": {
+#                         "type": "mrkdwn",
+#                         "text": f"✅ Your attendance has been recorded as *{final_status}*."
+#                     }
+#                 }
+#             ]
+#         })
+
+#     except Exception as e:
+#         print("Error handling interaction:", str(e))
+#         sys.stdout.flush()
+#         return jsonify({"text": f"⚠️ Internal error: {str(e)}"}), 200
 
 
 
