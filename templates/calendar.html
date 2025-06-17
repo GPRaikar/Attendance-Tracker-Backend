@@ -3,27 +3,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Attendance Calendar</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-  <div class="container">
+  <div class="calendar-container">
     <h1>📅 Attendance Calendar</h1>
-
-    <div class="controls">
-      <label for="userFilter">Filter by user:</label>
-      <select id="userFilter"></select>
-    </div>
-
-    <div class="month-nav">
+    <label for="userFilter">Filter by user:</label>
+    <select id="userFilter">
+      <option value="all">All Users</option>
+    </select>
+    <div class="calendar-controls">
       <button id="prevMonth">⬅️ Prev</button>
-      <strong id="monthLabel"></strong>
       <button id="nextMonth">➡️ Next</button>
     </div>
-
-    <div id="calendar" class="calendar"></div>
+    <div id="calendar"></div>
   </div>
 
-  <script src="/static/calendar.js"></script>
+  <script src="{{ url_for('static', filename='calendar.js') }}"></script>
 </body>
 </html>
