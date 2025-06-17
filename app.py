@@ -89,10 +89,10 @@ def handle_interaction():
                 {
                     "type": "section",
                     "text": 
-                    {
-                    "type": "mrkdwn",
-                    "text": f"✅ Your attendance has been recorded as *{final_status}*."
-                    }
+                        {
+                            "type": "mrkdwn",
+                            "text": f"✅ Your attendance has been recorded as *{final_status}*."
+                        }
                 }]
             })
 
