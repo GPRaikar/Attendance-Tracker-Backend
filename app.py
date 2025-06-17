@@ -1,5 +1,8 @@
 # app.py
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+from boto3.dynamodb.conditions import Key
+import dateutil.parser
 import json
 import os
 import sys
@@ -8,6 +11,8 @@ from datetime import datetime
 from threading import Thread
 
 app = Flask(__name__)
+
+CORS(app)  # Allow cross-origin requests from frontend
 
 # Set up DynamoDB client using environment variables
 dynamodb = boto3.resource(
@@ -81,6 +86,35 @@ def handle_interaction():
         print("Error handling interaction:", str(e))
         sys.stdout.flush()
         return jsonify({"text": f"⚠️ Internal error: {str(e)}"}), 200
+
+
+
+@app.route("/api/attendance", methods=["GET"])
+def get_attendance():
+    try:
+        response = table.scan()
+        items = response["Items"]
+
+        # Normalize timestamp to date
+        attendance_by_date = {}
+        for item in items:
+            date_str = dateutil.parser.parse(item["timestamp"]).date().isoformat()
+            if date_str not in attendance_by_date:
+                attendance_by_date[date_str] = []
+            attendance_by_date[date_str].append({
+                "user_id": item["user_id"],
+                "username": item.get("username", "unknown"),
+                "status": item["status"]
+            })
+
+        return jsonify(attendance_by_date)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/calendar")
+def calendar_view():
+    return render_template("calendar.html")
 
 
 
