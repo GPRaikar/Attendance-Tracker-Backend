@@ -9,6 +9,8 @@ import sys
 import boto3
 from datetime import datetime
 from threading import Thread
+from collections import defaultdict  # <-- make sure this import is present
+from dateutil import parser         # <-- also ensure this is imported
 
 app = Flask(__name__)
 
@@ -89,28 +91,60 @@ def handle_interaction():
 
 
 
+# @app.route("/api/attendance", methods=["GET"])
+# def get_attendance():
+#     try:
+#         response = table.scan()
+#         items = response["Items"]
+
+#         # Normalize timestamp to date
+#         attendance_by_date = {}
+#         for item in items:
+#             date_str = dateutil.parser.parse(item["timestamp"]).date().isoformat()
+#             if date_str not in attendance_by_date:
+#                 attendance_by_date[date_str] = []
+#             attendance_by_date[date_str].append({
+#                 "user_id": item["user_id"],
+#                 "username": item.get("username", "unknown"),
+#                 "status": item["status"]
+#             })
+
+#         return jsonify(attendance_by_date)
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/attendance", methods=["GET"])
 def get_attendance():
     try:
         response = table.scan()
         items = response["Items"]
 
-        # Normalize timestamp to date
-        attendance_by_date = {}
+        # Sort items by timestamp (oldest to newest)
+        items.sort(key=lambda x: x["timestamp"])
+
+        # Keep only the latest record per (user_id, date)
+        latest_per_user_per_day = {}
         for item in items:
-            date_str = dateutil.parser.parse(item["timestamp"]).date().isoformat()
-            if date_str not in attendance_by_date:
-                attendance_by_date[date_str] = []
-            attendance_by_date[date_str].append({
+            date_str = parser.parse(item["timestamp"]).date().isoformat()
+            key = (item["user_id"], date_str)
+            latest_per_user_per_day[key] = {
                 "user_id": item["user_id"],
                 "username": item.get("username", "unknown"),
                 "status": item["status"]
-            })
+            }
 
-        return jsonify(attendance_by_date)
+        # Group by date
+        attendance_by_date = defaultdict(list)
+        for (user_id, date_str), record in latest_per_user_per_day.items():
+            attendance_by_date[date_str].append(record)
+
+        return jsonify(dict(attendance_by_date))
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/calendar")
 def calendar_view():
