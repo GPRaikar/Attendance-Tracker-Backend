@@ -175,3 +175,6 @@ def apply_leave():
 
     return render_template("apply_leave.html")
 
+@app.route("/")
+def homepage():
+    return render_template("home.html")

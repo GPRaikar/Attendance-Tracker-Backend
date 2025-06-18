@@ -1,48 +1,65 @@
-<!-- templates/apply_leave.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Apply for Leave</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apply Leave</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='applyleave.css') }}" />
 </head>
 <body>
-  <div class="calendar-container">
-    <h1>🌴 Apply for Leave</h1>
+  <div class="container">
+    <h1>📝 Apply for Leave</h1>
     <form id="leaveForm">
-      <label for="username">Slack Username:</label>
-      <input type="text" id="username" required placeholder="e.g., gp.raikar" />
-
-      <label for="leaveDate">Select Leave Date:</label>
-      <input type="date" id="leaveDate" required />
-
-      <button type="submit">Apply</button>
+      <div class="input-group">
+        <label for="user_id">Slack User ID</label>
+        <input type="text" id="user_id" name="user_id" required />
+      </div>
+      <div class="input-group">
+        <label for="username">Slack Username</label>
+        <input type="text" id="username" name="username" required />
+      </div>
+      <div class="input-group">
+        <label for="leave_date">Leave Date</label>
+        <input type="date" id="leave_date" name="leave_date" required />
+      </div>
+      <button type="submit">Submit</button>
     </form>
-    <p id="responseMsg"></p>
-    <a href="/calendar">⬅️ Back to Calendar</a>
+    <div id="response" class="response"></div>
   </div>
 
   <script>
-    document.getElementById("leaveForm").addEventListener("submit", async (e) => {
+    const form = document.getElementById("leaveForm");
+    const responseDiv = document.getElementById("response");
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const username = document.getElementById("username").value;
-      const date = document.getElementById("leaveDate").value;
+      responseDiv.className = "response loading";
+      responseDiv.textContent = "Submitting...";
 
-      const res = await fetch("/applyleave", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, date })
-      });
+      const data = {
+        user_id: form.user_id.value,
+        username: form.username.value,
+        leave_date: form.leave_date.value
+      };
 
-      const msg = document.getElementById("responseMsg");
-      if (res.ok) {
-        msg.textContent = "✅ Leave successfully recorded!";
-        msg.style.color = "green";
-      } else {
-        msg.textContent = "❌ Failed to apply leave.";
-        msg.style.color = "red";
+      try {
+        const res = await fetch("/api/applyleave", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+
+        if (res.ok) {
+          responseDiv.className = "response success";
+          responseDiv.textContent = "✅ Leave recorded successfully!";
+          form.reset();
+        } else {
+          throw new Error(result.error || "Something went wrong");
+        }
+      } catch (err) {
+        responseDiv.className = "response error";
+        responseDiv.textContent = `❌ ${err.message}`;
       }
     });
   </script>
