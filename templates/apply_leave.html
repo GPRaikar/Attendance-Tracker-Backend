@@ -1,0 +1,50 @@
+<!-- templates/apply_leave.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Apply for Leave</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="calendar-container">
+    <h1>🌴 Apply for Leave</h1>
+    <form id="leaveForm">
+      <label for="username">Slack Username:</label>
+      <input type="text" id="username" required placeholder="e.g., gp.raikar" />
+
+      <label for="leaveDate">Select Leave Date:</label>
+      <input type="date" id="leaveDate" required />
+
+      <button type="submit">Apply</button>
+    </form>
+    <p id="responseMsg"></p>
+    <a href="/calendar">⬅️ Back to Calendar</a>
+  </div>
+
+  <script>
+    document.getElementById("leaveForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const date = document.getElementById("leaveDate").value;
+
+      const res = await fetch("/applyleave", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, date })
+      });
+
+      const msg = document.getElementById("responseMsg");
+      if (res.ok) {
+        msg.textContent = "✅ Leave successfully recorded!";
+        msg.style.color = "green";
+      } else {
+        msg.textContent = "❌ Failed to apply leave.";
+        msg.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>
