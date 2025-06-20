@@ -1,3 +1,4 @@
+<!-- templates/applyleave.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,6 +12,9 @@
   <div class="card">
     <h1>📆 Apply for Leave</h1>
     <form method="POST" action="/applyleave">
+      <label for="user_id">Slack User ID</label>
+      <input type="text" id="user_id" name="user_id" required placeholder="e.g., U07ASUK0M8C" />
+
       <label for="username">Your Username</label>
       <input type="text" id="username" name="username" required placeholder="e.g., gp.raikar" />
 

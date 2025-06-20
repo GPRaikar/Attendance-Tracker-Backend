@@ -11,6 +11,7 @@ from datetime import datetime
 from threading import Thread
 from collections import defaultdict  # <-- make sure this import is present
 from dateutil import parser         # <-- also ensure this is imported
+from datetime import datetime, timedelta
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
@@ -151,17 +152,15 @@ def calendar_view():
     return render_template("calendar.html")
 
 
-
-from datetime import datetime, timedelta
-
 @app.route("/applyleave", methods=["GET", "POST"])
 def apply_leave():
     if request.method == "POST":
+        user_id = request.form.get("user_id")
         username = request.form.get("username")
         start_date_str = request.form.get("start_date")
         end_date_str = request.form.get("end_date")
 
-        if not username or not start_date_str or not end_date_str:
+        if not user_id or not username or not start_date_str or not end_date_str:
             return render_template("applyleave.html", message="❌ All fields are required.")
 
         try:
@@ -171,11 +170,10 @@ def apply_leave():
             if end_date < start_date:
                 return render_template("applyleave.html", message="❌ End date cannot be before start date.")
 
-            # Save leave entry for each day in range
             current_date = start_date
             while current_date <= end_date:
                 item = {
-                    "user_id": f"manual-{username}",
+                    "user_id": user_id,
                     "username": username,
                     "status": "On Leave",
                     "timestamp": f"{current_date.isoformat()}T00:00:00Z"
@@ -190,6 +188,7 @@ def apply_leave():
             return render_template("applyleave.html", message="❌ Something went wrong.")
 
     return render_template("applyleave.html")
+
 
 
 @app.route("/")
