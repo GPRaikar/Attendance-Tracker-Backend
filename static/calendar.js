@@ -49,7 +49,7 @@ function renderCalendar() {
 
   Object.keys(attendanceData)
     .sort()
-    .reverse()
+//    .reverse()
     .forEach(dateStr => {
       const date = new Date(dateStr);
       if (date.getMonth() !== month || date.getFullYear() !== year) return;
