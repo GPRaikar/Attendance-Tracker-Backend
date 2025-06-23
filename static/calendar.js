@@ -1,5 +1,3 @@
-// static/calendar.js
-
 let attendanceData = {};
 let allUsers = new Set();
 let currentMonth = new Date();
@@ -34,6 +32,15 @@ function populateUserDropdown() {
   select.addEventListener("change", renderCalendar);
 }
 
+function getInitials(name) {
+  return name
+    .split(/[ ._]/)
+    .filter(Boolean)
+    .map(part => part[0].toUpperCase())
+    .slice(0, 2)
+    .join('');
+}
+
 function renderCalendar() {
   const filterUser = document.getElementById("userFilter").value;
   const calendar = document.getElementById("calendar");
@@ -46,56 +53,74 @@ function renderCalendar() {
 
   const month = currentMonth.getMonth();
   const year = currentMonth.getFullYear();
+  const todayStr = new Date().toISOString().split("T")[0];
 
-  Object.keys(attendanceData)
-    .sort()
-//    .reverse()
-    .forEach(dateStr => {
-      const date = new Date(dateStr);
-      if (date.getMonth() !== month || date.getFullYear() !== year) return;
+  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  weekdays.forEach(day => {
+    const header = document.createElement("div");
+    header.className = "day header";
+    header.textContent = day;
+    calendar.appendChild(header);
+  });
 
-      const entries = attendanceData[dateStr].filter(e => !filterUser || e.username === filterUser);
-      if (entries.length === 0) return;
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      const dayDiv = document.createElement("div");
-      dayDiv.className = "day";
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement("div");
+    empty.className = "day empty";
+    calendar.appendChild(empty);
+  }
 
-      const displayDate = date.toLocaleDateString(undefined, {
-        weekday: 'short', month: 'short', day: 'numeric'
-      });
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const dateStr = date.toISOString().split("T")[0];
+    const entries = (attendanceData[dateStr] || []).filter(
+      e => !filterUser || e.username === filterUser
+    );
 
-      const dateEl = document.createElement("div");
-      dateEl.className = "date";
-      dateEl.textContent = displayDate;
-      dayDiv.appendChild(dateEl);
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "day date-cell";
 
-      if (dateStr === new Date().toISOString().split("T")[0]) {
-        dayDiv.classList.add("today");
-      }
+    const dateEl = document.createElement("div");
+    dateEl.className = "date";
+    dateEl.textContent = day;
+    dayDiv.appendChild(dateEl);
 
-      entries.forEach(entry => {
-        const statusEl = document.createElement("div");
-        const status = entry.status.toLowerCase();
+    if (dateStr === todayStr) {
+      dayDiv.classList.add("today");
+    }
 
-        statusEl.className = "status " + (
-          status.includes("office") ? "wfo" :
-          status.includes("home") ? "wfh" :
-          status.includes("leave") ? "leave" : "unknown"
-        );
+    const grid = document.createElement("div");
+    grid.className = "entry-grid";
 
-        statusEl.textContent = `${entry.username}: ${entry.status}`;
-        dayDiv.appendChild(statusEl);
-      });
+    entries.forEach(entry => {
+      const fullName = entry.username || "Unknown";
+      const initials = getInitials(fullName);
+      const status = entry.status.toLowerCase();
 
-      calendar.appendChild(dayDiv);
+      const badge = document.createElement("div");
+      badge.className = "initial-box " + (
+        status.includes("office") ? "wfo" :
+        status.includes("home") ? "wfh" :
+        status.includes("leave") ? "leave" : "unknown"
+      );
+
+      badge.textContent = initials;
+      badge.title = `${fullName} is on ${status}`;
+      grid.appendChild(badge);
     });
+
+    dayDiv.appendChild(grid);
+    calendar.appendChild(dayDiv);
+  }
 }
 
-// Navigation
 document.getElementById("prevMonth").addEventListener("click", () => {
   currentMonth.setMonth(currentMonth.getMonth() - 1);
   renderCalendar();
 });
+
 document.getElementById("nextMonth").addEventListener("click", () => {
   currentMonth.setMonth(currentMonth.getMonth() + 1);
   renderCalendar();
