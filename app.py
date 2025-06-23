@@ -1,7 +1,7 @@
 # app.py
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from boto3.dynamodb.conditions import Key
+# from boto3.dynamodb.conditions import Key
 import dateutil.parser
 import json
 import os
@@ -12,6 +12,9 @@ from threading import Thread
 from collections import defaultdict  # <-- make sure this import is present
 from dateutil import parser         # <-- also ensure this is imported
 from datetime import datetime, timedelta
+from boto3.dynamodb.conditions import Key, Attr  # make sure Attr is imported
+import traceback
+
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
@@ -188,6 +191,54 @@ def apply_leave():
             return render_template("applyleave.html", message="❌ Something went wrong.")
 
     return render_template("applyleave.html")
+
+@app.route("/cancelleave", methods=["GET", "POST"])
+def cancel_leave():
+    if request.method == "POST":
+        user_id = request.form.get("user_id")
+        username = request.form.get("username")
+        start_date_str = request.form.get("start_date")
+        end_date_str = request.form.get("end_date")
+
+        if not user_id or not username or not start_date_str or not end_date_str:
+            return render_template("cancelleave.html", message="❌ All fields are required.")
+
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+
+            if end_date < start_date:
+                return render_template("cancelleave.html", message="❌ End date cannot be before start date.")
+
+            deleted_dates = []
+            current_date = start_date
+            while current_date <= end_date:
+                timestamp_prefix = f"{current_date.isoformat()}T"
+
+                response = table.scan(
+                    FilterExpression=Attr("user_id").eq(user_id) & Attr("timestamp").begins_with(timestamp_prefix)
+                )
+
+                for item in response.get("Items", []):
+                    if item.get("status") == "On Leave":
+                        table.delete_item(
+                            Key={"user_id": item["user_id"], "timestamp": item["timestamp"]}
+                        )
+                        deleted_dates.append(current_date.isoformat())
+
+                current_date += timedelta(days=1)
+
+            if deleted_dates:
+                return render_template("cancelleave.html", message=f"✅ Leave cancelled for: {', '.join(deleted_dates)}")
+            else:
+                return render_template("cancelleave.html", message="⚠️ No leave found to cancel in this range.")
+
+        except Exception as e:
+            print("Cancel leave error:", str(e))
+            traceback.print_exc()
+            return render_template("cancelleave.html", message="❌ Something went wrong.")
+
+    return render_template("cancelleave.html")
 
 
 
