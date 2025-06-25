@@ -21,6 +21,17 @@ body {
   border-radius: 4px;
 }
 
+.status-tag {
+  padding: 0.2rem 0.4rem;
+  margin: 2px 0;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: bold;
+  display: inline-block;
+}
+
+
 
 .calendar-container {
   max-width: 1000px;
