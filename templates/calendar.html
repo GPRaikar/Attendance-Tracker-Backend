@@ -1,4 +1,3 @@
-<!-- templates/calendar.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,20 +9,25 @@
 <body>
   <div class="calendar-container">
     <h1>📅 Attendance Calendar</h1>
+    <h2 id="monthLabel"></h2>
 
-    <div class="calendar-toolbar">
-      <label for="userFilter">Filter by user:</label>
-      <select id="userFilter"></select>
+    <label for="userFilter">Filter by user:</label>
+    <select id="userFilter">
+      <option value="">All Users</option>
+    </select>
 
-      <div class="calendar-controls">
-        <button id="prevMonth">⬅️</button>
-        <h2 id="monthLabel"></h2>
-        <button id="nextMonth">➡️</button>
-      </div>
+    <div class="calendar-controls">
+      <button id="prevMonth">⬅️ Prev</button>
+      <button id="nextMonth">➡️ Next</button>
     </div>
 
-    <div id="calendar">
-      <!-- JavaScript will dynamically append headers and day cells here -->
+    <div id="calendar"></div>
+
+    <div class="legend">
+      <h3>Legend</h3>
+      <div><span class="status wfo"></span> Work from Office</div>
+      <div><span class="status wfh"></span> Work from Home</div>
+      <div><span class="status leave"></span> On Leave</div>
     </div>
   </div>
 
