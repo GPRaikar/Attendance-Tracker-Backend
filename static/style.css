@@ -6,6 +6,22 @@ body {
   color: #333;
 }
 
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.day-name {
+  font-weight: bold;
+  text-align: center;
+  padding: 0.5rem;
+  background-color: #eef2f7;
+  border-radius: 4px;
+}
+
+
 .calendar-container {
   max-width: 1000px;
   margin: auto;
