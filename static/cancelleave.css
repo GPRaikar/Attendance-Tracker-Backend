@@ -1,0 +1,115 @@
+* {
+    box-sizing: border-box;
+  }
+  
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #e0f7fa, #f0f4f8);
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .cancel-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 2rem;
+  }
+  
+  .form-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 24px rgba(0, 128, 128, 0.15);
+    padding: 2rem;
+    animation: fadeIn 0.6s ease;
+    border: 2px solid #00796b;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  h1 {
+    margin-top: 0;
+    font-size: 2rem;
+    color: #00796b;
+    text-align: center;
+  }
+  
+  .subtitle {
+    text-align: center;
+    font-size: 1rem;
+    color: #5d5d5d;
+    margin-bottom: 2rem;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  label {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  
+  input[type="text"],
+  input[type="date"] {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border 0.3s ease;
+  }
+  
+  input:focus {
+    border: 1px solid #26c6da;
+    outline: none;
+    background-color: #f1fcfc;
+  }
+  
+  .date-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .date-group > div {
+    flex: 1;
+    min-width: 45%;
+  }
+  
+  button[type="submit"] {
+    background: linear-gradient(90deg, #00796b, #26c6da);
+    color: white;
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  
+  button:hover {
+    background: linear-gradient(90deg, #26c6da, #4dd0e1);
+    transform: scale(1.03);
+  }
+  
+  .message {
+    margin-top: 1rem;
+    background-color: #e0f7fa;
+    color: #006064;
+    padding: 0.8rem;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    border: 1px solid #4dd0e1;
+  }
+  
