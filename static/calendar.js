@@ -1,10 +1,7 @@
-// static/calendar.js
-
 let attendanceData = {};
 let allUsers = new Set();
 let currentMonth = new Date();
 
-// Load attendance data from the backend
 async function loadAttendance() {
   try {
     const res = await fetch("/api/attendance");
@@ -22,10 +19,9 @@ async function loadAttendance() {
   }
 }
 
-// Populate the user filter dropdown
 function populateUserDropdown() {
   const select = document.getElementById("userFilter");
-  select.innerHTML = `<option value="">All Users</option>`;
+  select.innerHTML = <option value="">All Users</option>;
   [...allUsers].sort().forEach(user => {
     const opt = document.createElement("option");
     opt.value = user;
@@ -36,7 +32,6 @@ function populateUserDropdown() {
   select.addEventListener("change", renderCalendar);
 }
 
-// Generate initials from username
 function getInitials(name) {
   return name
     .split(/[ ._]/)
@@ -46,7 +41,6 @@ function getInitials(name) {
     .join('');
 }
 
-// Render the calendar grid for the current month
 function renderCalendar() {
   const filterUser = document.getElementById("userFilter").value;
   const calendar = document.getElementById("calendar");
@@ -61,7 +55,6 @@ function renderCalendar() {
   const year = currentMonth.getFullYear();
   const todayStr = new Date().toISOString().split("T")[0];
 
-  // Weekday headers
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   weekdays.forEach(day => {
     const header = document.createElement("div");
@@ -73,14 +66,12 @@ function renderCalendar() {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Fill in empty cells before the first day
   for (let i = 0; i < firstDay; i++) {
     const empty = document.createElement("div");
     empty.className = "day empty";
     calendar.appendChild(empty);
   }
 
-  // Fill in days of the month
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, month, day);
     const dateStr = date.toISOString().split("T")[0];
@@ -91,7 +82,6 @@ function renderCalendar() {
     const dayDiv = document.createElement("div");
     dayDiv.className = "day date-cell";
 
-    // Date label
     const dateEl = document.createElement("div");
     dateEl.className = "date";
     dateEl.textContent = day;
@@ -101,7 +91,6 @@ function renderCalendar() {
       dayDiv.classList.add("today");
     }
 
-    // Entry badges
     const grid = document.createElement("div");
     grid.className = "entry-grid";
 
@@ -118,7 +107,7 @@ function renderCalendar() {
       );
 
       badge.textContent = initials;
-      badge.title = `${fullName} is on ${status}`;
+      badge.title = ${fullName} is on ${status};
       grid.appendChild(badge);
     });
 
@@ -127,15 +116,14 @@ function renderCalendar() {
   }
 }
 
-// Navigation buttons
 document.getElementById("prevMonth").addEventListener("click", () => {
   currentMonth.setMonth(currentMonth.getMonth() - 1);
   renderCalendar();
 });
+
 document.getElementById("nextMonth").addEventListener("click", () => {
   currentMonth.setMonth(currentMonth.getMonth() + 1);
   renderCalendar();
 });
 
-// Initial load
 document.addEventListener("DOMContentLoaded", loadAttendance);
