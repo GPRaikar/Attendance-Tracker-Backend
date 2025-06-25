@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cancel Leave</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='cancelleave.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="cancel-container">
+    <div class="form-card">
+      <h1>🗓️ Cancel Leave</h1>
+      <p class="subtitle">Changed plans? Cancel your leave here.</p>
+      <form method="POST" action="/cancelleave">
+        <label for="user_id">Slack User ID</label>
+        <input type="text" id="user_id" name="user_id" required placeholder="e.g., U07ASUK0M8C" />
+
+        <label for="username">Your Username</label>
+        <input type="text" id="username" name="username" required placeholder="e.g., gp.raikar" />
+
+        <div class="date-group">
+          <div>
+            <label for="start_date">Start Date</label>
+            <input type="date" id="start_date" name="start_date" required />
+          </div>
+          <div>
+            <label for="end_date">End Date</label>
+            <input type="date" id="end_date" name="end_date" required />
+          </div>
+        </div>
+
+        <button type="submit">Cancel Leave</button>
+      </form>
+
+      {% if message %}
+        <div class="message">{{ message }}</div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
