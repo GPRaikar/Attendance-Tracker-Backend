@@ -2,6 +2,16 @@ let attendanceData = {};
 let allUsers = new Set();
 let currentMonth = new Date();
 
+// Utility to get initials
+function getInitials(name) {
+  if (!name) return "??";
+  return name.split(" ")
+             .map(w => w[0]?.toUpperCase())
+             .join("")
+             .slice(0, 3);
+}
+
+// Load attendance from backend
 async function loadAttendance() {
   try {
     const res = await fetch("/api/attendance");
@@ -19,6 +29,7 @@ async function loadAttendance() {
   }
 }
 
+// Dropdown population
 function populateUserDropdown() {
   const select = document.getElementById("userFilter");
   select.innerHTML = `<option value="">All Users</option>`;
@@ -28,9 +39,11 @@ function populateUserDropdown() {
     opt.textContent = user;
     select.appendChild(opt);
   });
+
   select.addEventListener("change", renderCalendar);
 }
 
+// Render calendar
 function renderCalendar() {
   const filterUser = document.getElementById("userFilter").value;
   const calendar = document.getElementById("calendar");
@@ -47,31 +60,31 @@ function renderCalendar() {
   const startDay = firstDay.getDay();
   const totalDays = lastDay.getDate();
 
-  // Inject weekday headers dynamically
+  // Weekday headers (Sun to Sat)
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   weekdays.forEach(day => {
-    const dayHeader = document.createElement("div");
-    dayHeader.className = "day-name";
-    dayHeader.textContent = day;
-    calendar.appendChild(dayHeader);
+    const header = document.createElement("div");
+    header.className = "day-name";
+    header.textContent = day;
+    calendar.appendChild(header);
   });
 
-  // Fill blanks before 1st of the month
+  // Empty boxes before 1st
   for (let i = 0; i < startDay; i++) {
-    const blank = document.createElement("div");
-    blank.className = "day empty";
-    calendar.appendChild(blank);
+    const empty = document.createElement("div");
+    empty.className = "day empty";
+    calendar.appendChild(empty);
   }
 
-  // Fill calendar days
+  // Day boxes
   for (let day = 1; day <= totalDays; day++) {
     const dateObj = new Date(year, month, day);
     const dateStr = dateObj.toISOString().split("T")[0];
+
     const entries = (attendanceData[dateStr] || []).filter(e => !filterUser || e.username === filterUser);
 
     const dayDiv = document.createElement("div");
     dayDiv.className = "day";
-
     if (dateStr === new Date().toISOString().split("T")[0]) {
       dayDiv.classList.add("today");
     }
@@ -82,16 +95,21 @@ function renderCalendar() {
     dayDiv.appendChild(dateEl);
 
     entries.forEach(entry => {
-      const statusEl = document.createElement("div");
       const status = entry.status.toLowerCase();
+      const shortStatus = status.includes("office") ? "WFO" :
+                          status.includes("home") ? "WFH" :
+                          status.includes("leave") ? "LV" : "??";
 
+      const initials = getInitials(entry.username);
+
+      const statusEl = document.createElement("div");
       statusEl.className = "status-tag " + (
         status.includes("office") ? "wfo" :
         status.includes("home") ? "wfh" :
         status.includes("leave") ? "leave" : "unknown"
       );
+      statusEl.textContent = `${initials} (${shortStatus})`;
 
-      statusEl.textContent = `${entry.username}: ${entry.status}`;
       dayDiv.appendChild(statusEl);
     });
 
@@ -99,14 +117,16 @@ function renderCalendar() {
   }
 }
 
-
+// Navigation buttons
 document.getElementById("prevMonth").addEventListener("click", () => {
   currentMonth.setMonth(currentMonth.getMonth() - 1);
   renderCalendar();
 });
+
 document.getElementById("nextMonth").addEventListener("click", () => {
   currentMonth.setMonth(currentMonth.getMonth() + 1);
   renderCalendar();
 });
 
+// Load data on DOM ready
 document.addEventListener("DOMContentLoaded", loadAttendance);
