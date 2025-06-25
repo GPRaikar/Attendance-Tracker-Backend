@@ -62,19 +62,15 @@ function renderCalendar() {
     calendar.appendChild(empty);
   }
 
-  // Local time today's date string (YYYY-MM-DD)
-  const today = new Date();
-  const todayStr = today.toLocaleDateString('en-CA'); // YYYY-MM-DD
+  const todayStr = new Date().toLocaleDateString('en-CA');
 
   for (let day = 1; day <= totalDays; day++) {
     const localDate = new Date(year, month, day);
-    const dateStr = localDate.toLocaleDateString('en-CA'); // YYYY-MM-DD
-
+    const dateStr = localDate.toLocaleDateString('en-CA');
     const entries = (attendanceData[dateStr] || []).filter(e => !filterUser || e.username === filterUser);
 
     const dayDiv = document.createElement("div");
     dayDiv.className = "day";
-
     if (dateStr === todayStr) {
       dayDiv.classList.add("today");
     }
@@ -87,14 +83,13 @@ function renderCalendar() {
     entries.forEach(entry => {
       const statusEl = document.createElement("div");
       const status = entry.status.toLowerCase();
-
       statusEl.className = "status " + (
         status.includes("office") ? "wfo" :
         status.includes("home") ? "wfh" :
         status.includes("leave") ? "leave" : "unknown"
       );
-
       statusEl.textContent = `${entry.username}: ${entry.status}`;
+      statusEl.title = `${entry.username}: ${entry.status}`;
       dayDiv.appendChild(statusEl);
     });
 
@@ -102,7 +97,6 @@ function renderCalendar() {
   }
 }
 
-// Navigation
 document.getElementById("prevMonth").addEventListener("click", () => {
   currentMonth.setMonth(currentMonth.getMonth() - 1);
   renderCalendar();
