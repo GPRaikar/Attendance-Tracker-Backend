@@ -2,15 +2,6 @@ let attendanceData = {};
 let allUsers = new Set();
 let currentMonth = new Date();
 
-// Utility to get initials
-function getInitials(name) {
-  if (!name) return "??";
-  return name.split(" ")
-             .map(w => w[0]?.toUpperCase())
-             .join("")
-             .slice(0, 3);
-}
-
 // Load attendance from backend
 async function loadAttendance() {
   try {
@@ -29,7 +20,7 @@ async function loadAttendance() {
   }
 }
 
-// Dropdown population
+// Populate user dropdown
 function populateUserDropdown() {
   const select = document.getElementById("userFilter");
   select.innerHTML = `<option value="">All Users</option>`;
@@ -43,7 +34,7 @@ function populateUserDropdown() {
   select.addEventListener("change", renderCalendar);
 }
 
-// Render calendar
+// Render calendar view
 function renderCalendar() {
   const filterUser = document.getElementById("userFilter").value;
   const calendar = document.getElementById("calendar");
@@ -60,7 +51,7 @@ function renderCalendar() {
   const startDay = firstDay.getDay();
   const totalDays = lastDay.getDate();
 
-  // Weekday headers (Sun to Sat)
+  // Day names (Sun-Sat)
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   weekdays.forEach(day => {
     const header = document.createElement("div");
@@ -69,23 +60,28 @@ function renderCalendar() {
     calendar.appendChild(header);
   });
 
-  // Empty boxes before 1st
+  // Fill blank cells before 1st
   for (let i = 0; i < startDay; i++) {
     const empty = document.createElement("div");
     empty.className = "day empty";
     calendar.appendChild(empty);
   }
 
-  // Day boxes
+  // Get today string in local time
+  const today = new Date();
+  const todayStr = today.toLocaleDateString("en-CA"); // format: YYYY-MM-DD
+
+  // Render each day of the month
   for (let day = 1; day <= totalDays; day++) {
     const dateObj = new Date(year, month, day);
-    const dateStr = dateObj.toISOString().split("T")[0];
+    const dateStr = dateObj.toISOString().split("T")[0]; // safe parsing
 
     const entries = (attendanceData[dateStr] || []).filter(e => !filterUser || e.username === filterUser);
 
     const dayDiv = document.createElement("div");
     dayDiv.className = "day";
-    if (dateStr === new Date().toISOString().split("T")[0]) {
+
+    if (dateStr === todayStr) {
       dayDiv.classList.add("today");
     }
 
@@ -95,21 +91,16 @@ function renderCalendar() {
     dayDiv.appendChild(dateEl);
 
     entries.forEach(entry => {
-      const status = entry.status.toLowerCase();
-      const shortStatus = status.includes("office") ? "WFO" :
-                          status.includes("home") ? "WFH" :
-                          status.includes("leave") ? "LV" : "??";
-
-      const initials = getInitials(entry.username);
-
       const statusEl = document.createElement("div");
-      statusEl.className = "status-tag " + (
+      const status = entry.status.toLowerCase();
+
+      statusEl.className = "status " + (
         status.includes("office") ? "wfo" :
         status.includes("home") ? "wfh" :
         status.includes("leave") ? "leave" : "unknown"
       );
-      statusEl.textContent = `${initials} (${shortStatus})`;
 
+      statusEl.textContent = `${entry.username}: ${entry.status}`;
       dayDiv.appendChild(statusEl);
     });
 
@@ -128,5 +119,5 @@ document.getElementById("nextMonth").addEventListener("click", () => {
   renderCalendar();
 });
 
-// Load data on DOM ready
+// Initial load
 document.addEventListener("DOMContentLoaded", loadAttendance);
