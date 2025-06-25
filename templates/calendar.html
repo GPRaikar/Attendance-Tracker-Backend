@@ -7,31 +7,29 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-  <div class="zoom-wrapper">
-    <div class="calendar-container">
-      <!-- 📅 Header -->
-      <div class="calendar-header">
-        <h1>📅 Attendance Calendar</h1>
-        <p class="calendar-subtitle">View monthly team presence in style!</p>
-        <div class="filter-section">
-          <label for="userFilter">👤 Filter by user:</label>
-          <select id="userFilter">
-            <option value="">All Users</option>
-          </select>
-        </div>
+  <div class="calendar-container">
+    <h1>📅 Attendance Calendar</h1>
+
+    <div class="calendar-toolbar">
+      <label for="userFilter">Filter by user:</label>
+      <select id="userFilter"></select>
+
+      <div class="calendar-controls">
+        <button id="prevMonth">⬅️</button>
+        <h2 id="monthLabel"></h2>
+        <button id="nextMonth">➡️</button>
       </div>
+    </div>
 
-      <!-- 🗓️ Month Label -->
-      <h2 id="monthLabel" class="calendar-month-label"></h2>
-
-      <!-- 📆 Calendar Grid -->
+    <div class="calendar-grid">
+      <div class="day-name">Sun</div>
+      <div class="day-name">Mon</div>
+      <div class="day-name">Tue</div>
+      <div class="day-name">Wed</div>
+      <div class="day-name">Thu</div>
+      <div class="day-name">Fri</div>
+      <div class="day-name">Sat</div>
       <div id="calendar"></div>
-
-      <!-- 🔄 Navigation -->
-      <div class="calendar-controls bottom-controls">
-        <button id="prevMonth">⬅️ Prev</button>
-        <button id="nextMonth">➡️ Next</button>
-      </div>
     </div>
   </div>
 
