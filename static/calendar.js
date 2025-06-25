@@ -2,7 +2,6 @@ let attendanceData = {};
 let allUsers = new Set();
 let currentMonth = new Date();
 
-// Load attendance from backend
 async function loadAttendance() {
   try {
     const res = await fetch("/api/attendance");
@@ -20,7 +19,6 @@ async function loadAttendance() {
   }
 }
 
-// Populate user dropdown
 function populateUserDropdown() {
   const select = document.getElementById("userFilter");
   select.innerHTML = `<option value="">All Users</option>`;
@@ -34,7 +32,6 @@ function populateUserDropdown() {
   select.addEventListener("change", renderCalendar);
 }
 
-// Render calendar view
 function renderCalendar() {
   const filterUser = document.getElementById("userFilter").value;
   const calendar = document.getElementById("calendar");
@@ -51,7 +48,6 @@ function renderCalendar() {
   const startDay = firstDay.getDay();
   const totalDays = lastDay.getDate();
 
-  // Day names (Sun-Sat)
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   weekdays.forEach(day => {
     const header = document.createElement("div");
@@ -60,21 +56,19 @@ function renderCalendar() {
     calendar.appendChild(header);
   });
 
-  // Fill blank cells before 1st
   for (let i = 0; i < startDay; i++) {
     const empty = document.createElement("div");
     empty.className = "day empty";
     calendar.appendChild(empty);
   }
 
-  // Get today string in local time
+  // Local time today's date string (YYYY-MM-DD)
   const today = new Date();
-  const todayStr = today.toLocaleDateString("en-CA"); // format: YYYY-MM-DD
+  const todayStr = today.toLocaleDateString('en-CA'); // YYYY-MM-DD
 
-  // Render each day of the month
   for (let day = 1; day <= totalDays; day++) {
-    const dateObj = new Date(year, month, day);
-    const dateStr = dateObj.toISOString().split("T")[0]; // safe parsing
+    const localDate = new Date(year, month, day);
+    const dateStr = localDate.toLocaleDateString('en-CA'); // YYYY-MM-DD
 
     const entries = (attendanceData[dateStr] || []).filter(e => !filterUser || e.username === filterUser);
 
@@ -108,7 +102,7 @@ function renderCalendar() {
   }
 }
 
-// Navigation buttons
+// Navigation
 document.getElementById("prevMonth").addEventListener("click", () => {
   currentMonth.setMonth(currentMonth.getMonth() - 1);
   renderCalendar();
@@ -119,5 +113,4 @@ document.getElementById("nextMonth").addEventListener("click", () => {
   renderCalendar();
 });
 
-// Initial load
 document.addEventListener("DOMContentLoaded", loadAttendance);
