@@ -47,13 +47,23 @@ function renderCalendar() {
   const startDay = firstDay.getDay();
   const totalDays = lastDay.getDate();
 
-  // Fill blanks before month starts
+  // Inject weekday headers dynamically
+  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  weekdays.forEach(day => {
+    const dayHeader = document.createElement("div");
+    dayHeader.className = "day-name";
+    dayHeader.textContent = day;
+    calendar.appendChild(dayHeader);
+  });
+
+  // Fill blanks before 1st of the month
   for (let i = 0; i < startDay; i++) {
     const blank = document.createElement("div");
     blank.className = "day empty";
     calendar.appendChild(blank);
   }
 
+  // Fill calendar days
   for (let day = 1; day <= totalDays; day++) {
     const dateObj = new Date(year, month, day);
     const dateStr = dateObj.toISOString().split("T")[0];
@@ -88,6 +98,7 @@ function renderCalendar() {
     calendar.appendChild(dayDiv);
   }
 }
+
 
 document.getElementById("prevMonth").addEventListener("click", () => {
   currentMonth.setMonth(currentMonth.getMonth() - 1);
