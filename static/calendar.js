@@ -53,7 +53,8 @@ function renderCalendar() {
 
   const month = currentMonth.getMonth();
   const year = currentMonth.getFullYear();
-  const todayStr = new Date().toISOString().split("T")[0];
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   weekdays.forEach(day => {
@@ -74,7 +75,8 @@ function renderCalendar() {
 
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, month, day);
-    const dateStr = date.toISOString().split("T")[0];
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
     const entries = (attendanceData[dateStr] || []).filter(
       e => !filterUser || e.username === filterUser
     );

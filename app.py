@@ -1,26 +1,21 @@
 # app.py
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-# from boto3.dynamodb.conditions import Key
-import dateutil.parser
 import json
 import os
 import sys
 import boto3
-from datetime import datetime
+from datetime import datetime, timedelta, time
 from threading import Thread
-from collections import defaultdict  # <-- make sure this import is present
-from dateutil import parser         # <-- also ensure this is imported
-from datetime import datetime, timedelta
-from boto3.dynamodb.conditions import Key, Attr  # make sure Attr is imported
-import traceback
-
+from collections import defaultdict
+from dateutil import parser
+from boto3.dynamodb.conditions import Key, Attr
+from zoneinfo import ZoneInfo  # Python 3.9+
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+CORS(app)
 
-CORS(app)  # Allow cross-origin requests from frontend
-
-# Set up DynamoDB client using environment variables
+# AWS DynamoDB setup
 dynamodb = boto3.resource(
     "dynamodb",
     aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
@@ -31,13 +26,16 @@ dynamodb = boto3.resource(
 table_name = os.environ["DYNAMODB_TABLE_NAME"]
 table = dynamodb.Table(table_name)
 
+IST = ZoneInfo("Asia/Kolkata")  # Set Indian timezone
+
+
 def write_to_dynamodb(user_id, username, status):
     try:
         item = {
             "user_id": user_id,
             "username": username,
             "status": status,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(IST).isoformat()
         }
         table.put_item(Item=item)
         print(f"[{user_id}] saved: {status}")
@@ -45,6 +43,7 @@ def write_to_dynamodb(user_id, username, status):
     except Exception as e:
         print(f"[{user_id}] failed to save to DynamoDB:", e)
         sys.stdout.flush()
+
 
 @app.route("/slack/interact", methods=["POST"])
 def handle_interaction():
@@ -67,14 +66,8 @@ def handle_interaction():
             return jsonify({"text": "❌ Unknown action."}), 200
 
         final_status = status_map[action_id]
-
-        # Start background thread to write to DynamoDB
         Thread(target=write_to_dynamodb, args=(user_id, username, final_status)).start()
 
-        print(f"[{user_id}] selected: {final_status}")
-        sys.stdout.flush()
-
-        # Send confirmation immediately
         return jsonify({
             "replace_original": True,
             "blocks": [
@@ -94,44 +87,23 @@ def handle_interaction():
         return jsonify({"text": f"⚠️ Internal error: {str(e)}"}), 200
 
 
-
-# @app.route("/api/attendance", methods=["GET"])
-# def get_attendance():
-#     try:
-#         response = table.scan()
-#         items = response["Items"]
-
-#         # Normalize timestamp to date
-#         attendance_by_date = {}
-#         for item in items:
-#             date_str = dateutil.parser.parse(item["timestamp"]).date().isoformat()
-#             if date_str not in attendance_by_date:
-#                 attendance_by_date[date_str] = []
-#             attendance_by_date[date_str].append({
-#                 "user_id": item["user_id"],
-#                 "username": item.get("username", "unknown"),
-#                 "status": item["status"]
-#             })
-
-#         return jsonify(attendance_by_date)
-
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
-
 @app.route("/api/attendance", methods=["GET"])
 def get_attendance():
     try:
         response = table.scan()
         items = response["Items"]
 
-        # Sort items by timestamp (oldest to newest)
+        # Sort by timestamp
         items.sort(key=lambda x: x["timestamp"])
 
-        # Keep only the latest record per (user_id, date)
         latest_per_user_per_day = {}
         for item in items:
-            date_str = parser.parse(item["timestamp"]).date().isoformat()
+            dt = parser.isoparse(item["timestamp"])
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+            local_dt = dt.astimezone(IST)
+            date_str = local_dt.date().isoformat()
+
             key = (item["user_id"], date_str)
             latest_per_user_per_day[key] = {
                 "user_id": item["user_id"],
@@ -139,7 +111,6 @@ def get_attendance():
                 "status": item["status"]
             }
 
-        # Group by date
         attendance_by_date = defaultdict(list)
         for (user_id, date_str), record in latest_per_user_per_day.items():
             attendance_by_date[date_str].append(record)
@@ -175,11 +146,12 @@ def apply_leave():
 
             current_date = start_date
             while current_date <= end_date:
+                dt = datetime.combine(current_date, time(0, 0)).replace(tzinfo=IST)
                 item = {
                     "user_id": user_id,
                     "username": username,
                     "status": "On Leave",
-                    "timestamp": f"{current_date.isoformat()}T00:00:00Z"
+                    "timestamp": dt.isoformat()
                 }
                 table.put_item(Item=item)
                 current_date += timedelta(days=1)
@@ -191,6 +163,7 @@ def apply_leave():
             return render_template("applyleave.html", message="❌ Something went wrong.")
 
     return render_template("applyleave.html")
+
 
 @app.route("/cancelleave", methods=["GET", "POST"])
 def cancel_leave():
@@ -235,16 +208,15 @@ def cancel_leave():
 
         except Exception as e:
             print("Cancel leave error:", str(e))
-            traceback.print_exc()
             return render_template("cancelleave.html", message="❌ Something went wrong.")
 
     return render_template("cancelleave.html")
-
 
 
 @app.route("/")
 def homepage():
     return render_template("home.html")
 
+
 if __name__ == "__main__":
-    app.run(debug=True) 
+    app.run(debug=True)
