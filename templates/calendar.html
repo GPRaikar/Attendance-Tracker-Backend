@@ -7,33 +7,19 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-  <div class="zoom-wrapper">
-    <div class="calendar-container">
-      <!-- 📅 Header -->
-      <div class="calendar-header">
-        <h1>📅 Attendance Calendar</h1>
-        <p class="calendar-subtitle">View monthly team presence in style!</p>
-        <div class="filter-section">
-          <label for="userFilter">👤 Filter by user:</label>
-          <select id="userFilter">
-            <option value="">All Users</option>
-          </select>
-        </div>
-      </div>
+  <div class="calendar-container">
+    <h1>📅 Attendance Calendar</h1>
+    <h2 id="monthLabel"></h2>
 
-      <!-- 🗓️ Month Label -->
-      <h2 id="monthLabel" class="calendar-month-label"></h2>
+    <label for="userFilter">Filter by user:</label>
+    <select id="userFilter">
+      <option value="">All Users</option>
+    </select>
 
-      <!-- 📆 Calendar Grid -->
-      <div id="calendar"></div>
-
-      <!-- 🔄 Navigation -->
-      <div class="calendar-controls bottom-controls">
-        <button id="prevMonth">⬅️ Prev</button>
-        <button id="nextMonth">➡️ Next</button>
-      </div>
+    <div class="calendar-controls">
+      <button id="prevMonth">⬅️ Prev</button>
+      <button id="nextMonth">➡️ Next</button>
     </div>
-<<<<<<< HEAD
 
     <div id="calendar"></div>
 
@@ -43,8 +29,6 @@
       <div><span class="status wfh"></span> Work from Home</div>
       <div><span class="status leave"></span> On Leave</div>
     </div>
-=======
->>>>>>> Prathvi
   </div>
 
   <script src="{{ url_for('static', filename='calendar.js') }}"></script>
