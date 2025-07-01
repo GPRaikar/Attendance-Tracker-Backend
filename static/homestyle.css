@@ -87,4 +87,65 @@
       text-align: center;
     }
   }
-  
+
+
+
+/* Leave Section */
+.leave-section {
+  max-width: 720px;
+  margin: 2rem auto 5rem auto;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, #f3fdfd, #e1f5fe);
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(0, 150, 136, 0.12);
+  text-align: center;
+  animation: fadeInUp 0.9s ease;
+}
+
+.leave-section h2 {
+  font-size: 2rem;
+  color: #00695c;
+  margin-bottom: 1rem;
+}
+
+.leave-section p {
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 2rem;
+}
+
+.leave-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.2rem;
+}
+
+.leave-buttons .button {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  background: linear-gradient(90deg, #00838f, #4dd0e1);
+  color: white;
+  border-radius: 14px;
+  text-decoration: none;
+  box-shadow: 0 6px 14px rgba(0, 150, 136, 0.2);
+  transition: all 0.3s ease;
+}
+
+.leave-buttons .button:hover {
+  background: linear-gradient(90deg, #26c6da, #81d4fa);
+  transform: scale(1.07);
+  box-shadow: 0 10px 22px rgba(0, 150, 136, 0.25);
+}
+
+@media (max-width: 600px) {
+  .leave-buttons {
+    flex-direction: column;
+  }
+
+  .leave-buttons .button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
