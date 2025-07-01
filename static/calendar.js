@@ -32,15 +32,6 @@ function populateUserDropdown() {
   select.addEventListener("change", renderCalendar);
 }
 
-function getInitials(name) {
-  return name
-    .split(/[ ._]/)
-    .filter(Boolean)
-    .map(part => part[0].toUpperCase())
-    .slice(0, 2)
-    .join('');
-}
-
 function renderCalendar() {
   const filterUser = document.getElementById("userFilter").value;
   const calendar = document.getElementById("calendar");
@@ -50,67 +41,58 @@ function renderCalendar() {
   document.getElementById("monthLabel").textContent = currentMonth.toLocaleDateString(undefined, options);
 
   const year = currentMonth.getFullYear();
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const month = currentMonth.getMonth();
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDay = firstDay.getDay();
+  const totalDays = lastDay.getDate();
 
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   weekdays.forEach(day => {
     const header = document.createElement("div");
-    header.className = "day header";
+    header.className = "day-name";
     header.textContent = day;
     calendar.appendChild(header);
   });
 
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  for (let i = 0; i < firstDay; i++) {
+  for (let i = 0; i < startDay; i++) {
     const empty = document.createElement("div");
     empty.className = "day empty";
     calendar.appendChild(empty);
   }
 
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day);
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const todayStr = new Date().toLocaleDateString('en-CA');
 
-    const entries = (attendanceData[dateStr] || []).filter(
-      e => !filterUser || e.username === filterUser
-    );
+  for (let day = 1; day <= totalDays; day++) {
+    const localDate = new Date(year, month, day);
+    const dateStr = localDate.toLocaleDateString('en-CA');
+    const entries = (attendanceData[dateStr] || []).filter(e => !filterUser || e.username === filterUser);
 
     const dayDiv = document.createElement("div");
-    dayDiv.className = "day date-cell";
+    dayDiv.className = "day";
+    if (dateStr === todayStr) {
+      dayDiv.classList.add("today");
+    }
 
     const dateEl = document.createElement("div");
     dateEl.className = "date";
     dateEl.textContent = day;
     dayDiv.appendChild(dateEl);
 
-    if (dateStr === todayStr) {
-      dayDiv.classList.add("today");
-    }
-
-    const grid = document.createElement("div");
-    grid.className = "entry-grid";
-
     entries.forEach(entry => {
-      const fullName = entry.username || "Unknown";
-      const initials = getInitials(fullName);
+      const statusEl = document.createElement("div");
       const status = entry.status.toLowerCase();
-
-      const badge = document.createElement("div");
-      badge.className = "initial-box " + (
+      statusEl.className = "status " + (
         status.includes("office") ? "wfo" :
         status.includes("home") ? "wfh" :
         status.includes("leave") ? "leave" : "unknown"
       );
-
-      badge.textContent = initials;
-      badge.title = `${fullName} is on ${status}`;
-      grid.appendChild(badge);
+      statusEl.textContent = `${entry.username}: ${entry.status}`;
+      statusEl.title = `${entry.username}: ${entry.status}`;
+      dayDiv.appendChild(statusEl);
     });
 
-    dayDiv.appendChild(grid);
     calendar.appendChild(dayDiv);
   }
 }
